@@ -32,9 +32,10 @@ abstract class AbstractAdminCommand
      */
     public function execute(Message $message): void
     {
-        // TODO Null pointer exception may occur here
-        if ($message->getFrom()->getId() != $this->adminId) {
-            throw new AccessDeniedTelegramException("Access Denied for user ID:{$message->getFrom()->getId()}");
+        if ($message->getFrom() === null || $message->getFrom()->getId() != $this->adminId) {
+            $userId = $message->getFrom() ? $message->getFrom()->getId() : 'null';
+
+            throw new AccessDeniedTelegramException("Access Denied for user ID:{$userId}");
         }
 
         $this->executeCommand($message);

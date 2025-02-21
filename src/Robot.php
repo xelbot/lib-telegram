@@ -26,10 +26,6 @@ class Robot
     public const EMOJI_ROBOT = '&#x1F916;';
     public const EMOJI_THINKING_FACE = '&#x1F914;';
 
-    protected string $token = '';
-
-    protected string $botName = '';
-
     protected int $adminId;
 
     /**
@@ -40,12 +36,12 @@ class Robot
     /**
      * @var LoggerInterface|null
      */
-    protected $logger;
+    private $logger;
 
     /**
      * @var TelegramCommandInterface[]
      */
-    protected $commands = [];
+    private $commands = [];
 
     /**
      * @var UpdatesManagerInterface|null
@@ -54,12 +50,11 @@ class Robot
 
     /**
      * @param string $token
-     * @param string $botName
      * @param int $adminId
      *
      * @throws TelegramException
      */
-    public function __construct(string $token, string $botName, int $adminId)
+    public function __construct(string $token, int $adminId)
     {
         if (!$token) {
             throw new TelegramException('API KEY not defined');
@@ -69,12 +64,7 @@ class Robot
             throw new TelegramException('Invalid API KEY');
         }
 
-        $this->token = $token;
         $this->adminId = $adminId;
-
-        if ($botName) {
-            $this->botName = $botName;
-        }
 
         $this->requester = new TelegramRequester($token);
     }
@@ -233,12 +223,11 @@ class Robot
             if (isset($this->commands[$commandName])) {
                 $this->commands[$commandName]->execute($message);
             } else {
-                // TODO Null pointer exception may occur here
                 $this->requester->sendMessage([
                     'chat_id' => $message->getChat()->getId(),
                     'text' => sprintf(
                         'Не знаю такую команду%s %s ',
-                        $this->appealTo($message->getFrom()->getId()),
+                        $message->getFrom() ? $this->appealTo($message->getFrom()->getId()) : '',
                         self::EMOJI_ROBOT
                     ),
                     'parse_mode' => 'HTML',

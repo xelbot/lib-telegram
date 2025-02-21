@@ -22,10 +22,7 @@ use Xelbot\Telegram\Exception\TelegramException;
  */
 class TelegramRequester
 {
-    /**
-     * @var array
-     */
-    public static $availableMethods = [
+    public static array $availableMethods = [
         'setWebhook',
         'getWebhookInfo',
         'deleteWebhook',
@@ -81,7 +78,7 @@ class TelegramRequester
             $response = $this->send('sendMessage', $data);
 
             $text = mb_substr($text, 4096);
-        } while (mb_strlen($text, 'UTF-8') > 0);
+        } while ($text !== '');
 
         return $response;
     }
@@ -96,7 +93,7 @@ class TelegramRequester
      */
     public function __call($method, $args)
     {
-        if (in_array($method, self::$availableMethods)) {
+        if (in_array($method, self::$availableMethods, true)) {
             array_unshift($args, $method);
 
             return call_user_func_array([$this, 'send'], $args);
@@ -151,12 +148,7 @@ class TelegramRequester
         return new TelegramResponse($responseData ?: []);
     }
 
-    /**
-     * @param array $params
-     *
-     * @return array
-     */
-    protected function prepareRequestParams(array $params)
+    protected function prepareRequestParams(array $params): array
     {
         $hasResource = false;
         $multipart = [];
