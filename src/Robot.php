@@ -186,6 +186,8 @@ class Robot
                     $this->executeCommand($message, $entity);
                 }
             }
+        } else {
+            $this->logger->error('Telegram update without message');
         }
     }
 
